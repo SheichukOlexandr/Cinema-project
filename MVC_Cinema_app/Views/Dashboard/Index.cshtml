@@ -1,10 +1,91 @@
 ﻿
 @{
-    ViewData["Title"] = "Create";
-    Layout = "~/Views/Shared/MinimalLayout.cshtml";
+    ViewData["Title"] = "Дашборд";
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Привіт</h1>
-    <p>Це поки що панель управління для тесту</p>
+<h2>Дашборд</h2>
+<div class="row">
+    <!-- Stats Cards -->
+    <div class="col-md-4" style="--index: 1;">
+        <div class="card-stats">
+            <i class="fas fa-dollar-sign"></i>
+            <h5>Загальні продажі</h5>
+            <p id="total-sales">$@(ViewBag.TotalSales?.ToString("F2") ?? "0.00")</p>
+        </div>
+    </div>
+    <div class="col-md-4" style="--index: 2;">
+        <div class="card-stats">
+            <i class="fas fa-ticket-alt"></i>
+            <h5>Бронювання сьогодні</h5>
+            <p id="bookings-today">@(ViewBag.BookingsToday ?? 0)</p>
+        </div>
+    </div>
+    <div class="col-md-4" style="--index: 3;">
+        <div class="card-stats">
+            <i class="fas fa-clock"></i>
+            <h5>Активні сеанси</h5>
+            <p id="active-sessions">@(ViewBag.ActiveSessions ?? 0)</p>
+        </div>
+    </div>
 </div>
+
+<!-- Sessions Table -->
+<h3>Останні сеанси</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Фільм</th>
+            <th>Час</th>
+            <th>Продані квитки</th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody id="sessions-table">
+        @if (ViewBag.Sessions != null)
+        {
+            int rowIndex = 1;
+            foreach (var session in ViewBag.Sessions)
+            {
+                <tr style="--row-index: @rowIndex;">
+                    <td>@session.MovieTitle</td>
+                    <td>@session.ShowTime</td>
+                    <td>@session.TicketsSold</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-session" data-id="@session.Id">Редагувати</button>
+                    </td>
+                </tr>
+                rowIndex++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4">Сеанси відсутні.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function updateStats() {
+                $.ajax({
+                    url: '/Dashboard/GetStats',
+                    method: 'GET',
+                    success: function (data) {
+                        $('#total-sales').text('$' + data.totalSales);
+                        $('#bookings-today').text(data.bookingsToday);
+                        $('#active-sessions').text(data.activeSessions);
+                    }
+                });
+            }
+            setInterval(updateStats, 30000);
+            $('.edit-session').click(function () {
+                var sessionId = $(this).data('id');
+                alert('Редагувати сеанс з ID: ' + sessionId);
+            });
+        });
+    </script>
+}
