@@ -94,11 +94,11 @@ header, nav {
 }
 
 
-
 .container {
     max-width: 1920px;
     margin: auto;
 }
+
 
 .navbar, .banner, .movies, .category, .live {
     padding: 0 var(--padding-x);
